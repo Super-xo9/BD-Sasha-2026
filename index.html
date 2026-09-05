@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>С Днём Рождения, Саша!</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: #2A7F8E;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            user-select: none;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 30px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .bg-bubbles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.4;
+            animation: floatBubble linear infinite;
+            filter: blur(2px);
+        }
+
+        @keyframes floatBubble {
+            0% { transform: translateY(100vh) scale(0.5); opacity: 0.1; }
+            50% { opacity: 0.5; }
+            100% { transform: translateY(-100vh) scale(1.2); opacity: 0.1; }
+        }
+
+        /* --- Экран приветствия --- */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: transparent;
+            transition: opacity 0.6s ease, transform 0.6s ease;
+            pointer-events: all;
+        }
+
+        #splash-screen.hidden {
+            opacity: 0;
+            transform: scale(1.1);
+            pointer-events: none;
+        }
+
+        #white-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 999;
+            background-color: white;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        #white-overlay.active { opacity: 1; }
+
+        .splash-gift-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .gift-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .gift-emoji {
+            font-size: 180px;
+            position: relative;
+            animation: bounce 3s infinite ease-in-out;
+            z-index: 2;
+        }
+
+        .gift-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 320px;
+            height: 320px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 70%);
+            animation: glowPulse 2s infinite alternate ease-in-out;
+            z-index: 1;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-25px); }
+        }
+
+        @keyframes glowPulse {
+            0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.6; }
+            100% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+        }
+
+        .splash-text {
+            margin-top: 100px;
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: white;
+            animation: blinkText 2s infinite ease-in-out;
+            z-index: 1;
+        }
+
+        @keyframes blinkText {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        @media (max-width: 600px) {
+            .gift-emoji { font-size: 140px; }
+            .gift-glow { width: 240px; height: 240px; }
+            .splash-text { margin-top: 80px; font-size: 28px; }
+        }
+
+        /* --- Основной контент --- */
+        .wrapper {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin: 0;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 1s ease, transform 1s ease;
+            pointer-events: none;
+        }
+
+        .wrapper.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+
+        .badge {
+            background: linear-gradient(145deg, #2C6B7A, #4A8B9C);
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            margin-bottom: 25px;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .badge span { font-size: 24px; }
+
+        .card-wrapper {
+            position: relative;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card-container {
+            position: relative;
+            border-radius: 24px;
+            overflow: hidden;
+            touch-action: none;
+            box-shadow: 0 15px 35px rgba(26, 95, 110, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            background: linear-gradient(145deg, #2C6B7A, #4A8B9C);
+            transition: aspect-ratio 0.3s ease, width 0.3s ease;
+            aspect-ratio: 1 / 1;
+            max-width: 300px;
+            width: 100%;
+            touch-action: pan-y;
+        }
+
+        .card-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+            padding: 20px 20px 15px 20px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .card-text {
+            font-size: 15px;
+            line-height: 1.6;
+            font-weight: 400;
+            text-align: left;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            flex-grow: 1;
+            padding-right: 5px;
+            max-height: 65%;
+            padding-bottom: 5px;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-y;
+            opacity: 1;
+            transform-origin: left center;
+            transition: opacity 0.3s ease, transform 0.3s ease, font-size 0.5s ease;
+        }
+
+        .card-text::-webkit-scrollbar { width: 4px; }
+        .card-text::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 4px; }
+        .card-text::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
+
+        /* --- Ссылка со скрепкой --- */
+        .attachment-link {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: #B0E0E6; /* более светлый оттенок для читаемости */
+            font-size: 13px;
+            cursor: pointer;
+            margin-top: 5px;
+            opacity: 0.9;
+            transition: opacity 0.3s;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+
+        .attachment-link:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
+
+        .attachment-link svg { width: 18px; height: 18px; fill: currentColor; }
+
+        /* --- Индикатор "Листай ниже . . ." --- */
+        .scroll-indicator {
+            display: none;
+            text-align: center;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 5px;
+            flex-shrink: 0;
+            letter-spacing: 0.5px;
+        }
+
+        .scroll-indicator .dot {
+            display: inline-block;
+            animation: dotBlink 1.4s infinite ease-in-out both;
+        }
+        .scroll-indicator .dot:nth-child(1) { animation-delay: -0.32s; }
+        .scroll-indicator .dot:nth-child(2) { animation-delay: -0.16s; }
+        .scroll-indicator .dot:nth-child(3) { animation-delay: 0s; }
+
+        @keyframes dotBlink {
+            0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+            40% { opacity: 1; transform: scale(1.1); }
+        }
+
+        .card-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 5px;
+            margin-top: 5px;
+            flex-shrink: 0;
+        }
+
+        .card-author { font-size: 14px; opacity: 0.7; font-weight: 300; }
+
+        .card-nav-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            transition: transform 0.2s, opacity 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-nav-btn:active { transform: scale(0.9); opacity: 0.6; }
+
+        .card-nav-btn.pc-left {
+            position: absolute;
+            left: -45px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 28px;
+        }
+
+        .card-nav-btn.pc-right {
+            position: absolute;
+            right: -45px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 28px;
+        }
+
+        .card-nav-btn.pc-left:active, .card-nav-btn.pc-right:active {
+            transform: translateY(-50%) scale(0.9);
+        }
+
+        .mobile-nav-btn { display: none; }
+
+        @media (max-width: 450px) {
+            .mobile-nav-btn { display: flex; }
+            .pc-nav-btn { display: none !important; }
+            .card-bottom { padding: 0 10px; }
+            .card-text { font-size: 14px; }
+            .scroll-indicator { font-size: 12px; }
+        }
+
+        /* --- Индикатор (полоса с кружком) --- */
+        #progress-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 15px;
+            height: 12px;
+            width: 100%;
+            max-width: 200px;
+            opacity: 0;
+            transition: opacity 2s ease;
+            cursor: pointer;
+        }
+
+        #progress-container.active {
+            transition: opacity 0.3s ease;
+            opacity: 1;
+        }
+
+        #progress-track {
+            position: relative;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            touch-action: none;
+        }
+
+        #progress-thumb {
+            position: absolute;
+            top: 50%;
+            left: 0%;
+            transform: translate(-50%, -50%);
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+            transition: left 0.4s ease;
+            cursor: grab;
+            touch-action: none;
+        }
+
+        #progress-thumb:active { cursor: grabbing; }
+
+        /* --- "ТЫ" и слово --- */
+        .title-section {
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        .title-section h1 {
+            font-size: 48px;
+            margin: 0;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .word-container {
+            height: 70px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 32px;
+            font-weight: 500;
+            margin-top: 5px;
+            position: relative;
+        }
+
+        #dynamic-word {
+            transition: opacity 0.5s ease, font-size 0.5s ease, font-weight 0.5s ease;
+            opacity: 1;
+            color: #e0f7fa;
+            text-shadow: 0 0 10px rgba(255,255,255,0.1);
+        }
+
+        /* --- x2 значок (светло-бирюзовый) --- */
+        #x2-badge {
+            position: absolute;
+            top: 8px;
+            right: -30px;
+            font-size: 22px;
+            font-weight: 700;
+            color: #00E5FF;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none;
+        }
+
+        #x2-badge.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .falling-cat {
+            position: fixed;
+            z-index: 999;
+            font-size: 60px;
+            pointer-events: none;
+            opacity: 1;
+            animation: fallAndSpin 1.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            animation-delay: 1.5s;
+        }
+
+        @keyframes fallAndSpin {
+            0% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+            100% { opacity: 0; transform: translateY(100vh) rotate(1080deg) scale(0.5); }
+        }
+
+        @media (max-width: 450px) {
+            .falling-cat { font-size: 45px; }
+            #x2-badge {
+                right: -25px;
+                font-size: 18px;
+                top: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-bubbles" id="bubbleContainer"></div>
+
+<!-- Экран приветствия -->
+<div id="splash-screen">
+    <div class="splash-gift-container">
+        <div class="gift-wrapper">
+            <div class="gift-glow"></div>
+            <div class="gift-emoji">🎁</div>
+        </div>
+        <div class="splash-text">ЖМИ! ЖМИ!</div>
+    </div>
+</div>
+
+<div id="white-overlay"></div>
+
+<!-- Основной контент -->
+<div class="wrapper" id="mainContent">
+    <div class="badge">
+        <span>🥳</span> С Днём Рождения, Саша!
+    </div>
+
+    <div class="card-wrapper">
+        <button class="card-nav-btn pc-nav-btn pc-left" onclick="changeSlide(-1)">&#10094;</button>
+        
+        <div class="card-container" id="card-container">
+            <div class="card-content" id="card-content">
+                <div class="card-text" id="message-text">Поздравляю с Днём Рождения! 🎉</div>
+                
+                <!-- Индикатор "Листай ниже . . ." -->
+                <div class="scroll-indicator" id="scroll-indicator">
+                    Листай ниже <span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
+                </div>
+
+                <a class="attachment-link" id="attachment-link" href="#" target="_blank" rel="noopener noreferrer">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5a2.5 2.5 0 0 1 5 0v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5a2.5 2.5 0 0 0 5 0V5c0-2.21-1.79-4-4-4S7 2.79 7 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z"/>
+                    </svg>
+                    <span>А ещё тут что-то есть :)</span>
+                </a>
+
+                <div class="card-bottom">
+                    <button class="card-nav-btn mobile-nav-btn" onclick="changeSlide(-1)">&#10094;</button>
+                    <div class="card-author" id="message-author">Миша Волков</div>
+                    <button class="card-nav-btn mobile-nav-btn" onclick="changeSlide(1)">&#10095;</button>
+                </div>
+            </div>
+        </div>
+
+        <button class="card-nav-btn pc-nav-btn pc-right" onclick="changeSlide(1)">&#10095;</button>
+    </div>
+
+    <div id="progress-container">
+        <div id="progress-track">
+            <div id="progress-thumb"></div>
+        </div>
+    </div>
+
+    <div class="title-section">
+        <h1>ТЫ</h1>
+        <div class="word-container">
+            <span id="dynamic-word">светлая</span>
+            <span id="x2-badge">×2</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ============================================================
+    // Логика приветственного экрана
+    // ============================================================
+    const splashScreen = document.getElementById('splash-screen');
+    const whiteOverlay = document.getElementById('white-overlay');
+    const mainContent = document.getElementById('mainContent');
+
+    function startApp(e) {
+        e.stopPropagation();
+        splashScreen.classList.add('hidden');
+        whiteOverlay.classList.add('active');
+        
+        setTimeout(() => {
+            splashScreen.style.display = 'none';
+            whiteOverlay.classList.remove('active');
+            mainContent.classList.add('visible');
+            setTimeout(() => {
+                whiteOverlay.style.display = 'none';
+            }, 500);
+        }, 600);
+    }
+
+    splashScreen.addEventListener('click', startApp);
+
+    // ============================================================
+    // Создание пузырьков
+    // ============================================================
+    function createBubbles() {
+        const container = document.getElementById('bubbleContainer');
+        const colors = ['#4CBADB', '#89CDE2', '#A5DFEB', '#6ECEE0', '#3BA3C4', '#B3E5F2'];
+        const bubbleCount = 25;
+
+        for (let i = 0; i < bubbleCount; i++) {
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            
+            const size = Math.random() * 100 + 30;
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            const duration = Math.random() * 15 + 10;
+            const delay = Math.random() * -20;
+            const left = Math.random() * 100;
+
+            bubble.style.width = size + 'px';
+            bubble.style.height = size + 'px';
+            bubble.style.background = color;
+            bubble.style.left = left + '%';
+            bubble.style.animationDuration = duration + 's';
+            bubble.style.animationDelay = delay + 's';
+            
+            container.appendChild(bubble);
+        }
+    }
+
+    window.addEventListener('load', createBubbles);
+
+    // ============================================================
+    // Данные для поздравлений (все карточки)
+    // ============================================================
+    const congratData = [
+        {
+            text: "Саша, поздравляю с Днём Рождения!\n\nЗа время нашей учебы ты запомнилась мне как светлая и глубокая личность. Я по-настоящему восхищаюсь твоей добротой.\n\nЖелаю, чтобы каждый день был наполнен радостью, смехом и новыми достижениями. Пусть все твои мечты сбываются, а рядом всегда будут верные друзья и любимые люди. Счастья, здоровья и, конечно же, побольше счастливых моментов!",
+            author: "Миша Волков",
+            link: "https://drive.google.com/file/d/1yCHCOwNH_f7UCobIZp-B4w7boJJfICLy/view?usp=drivesdk"
+        },
+        {
+            text: "Саша, поздравляю тебя с днём рождения! Ты красивая и умная девочка, желаю тебе большого счастья в жизни, гигантских успехов и нереально огромных денег. С др крч)",
+            author: "Жанна Куц",
+            link: null
+        },
+        {
+            text: "Сашенька, желаю тебе всего самого крутого, счастья, здоровья, удачи и самое главное любви и искренних людей рядом!!\n\nТы очень милая и добрая, красотка просто ❤️",
+            author: "Даша Золотова",
+            link: null
+        },
+        {
+            text: "Саша поздравляю с днем рождения!!!❤️❤️❤️\n\nТы нереально прикольная и классная одногруппница!!! С тобой всегда можно поговорить, похихикать и вообще мило провести время!!! Я чувствую от тебя нереальный вайбик girl power 💅💅💅 Хочу пожелать всегда оставаться такой же классной и чтобы все мечты сбывались, лютой сваги и преколышей🌹🌹🌹",
+            author: "Полина Барсукова",
+            link: "https://drive.google.com/file/d/1YBMCCGRXqbp5fpdFTpi_IljK-K52b-bU/view?usp=drivesdk"
+        },
+        {
+            text: "Саша, поздравляю тебя с днëм рождения! Оставайся такой же яркой и красивой.",
+            author: "Лиза Беляева",
+            link: null
+        },
+        {
+            text: "С днём рождения тебя, Саша!❤️\nЖелаю тебе всего самого хорошего и светлого) Пусть рядом всегда будут люди, с которыми тебе комфортно и весело, а в жизни будет как можно больше приятных событий, новых впечатлений и счастливых моментов.\n\nМы давно уже не общались так, как в самом начале учёбы, но я очень хорошо помню то время, когда только поступили и познакомились. Время так быстро прошло, что уже даже немного странно осознавать, сколько всего с тех пор произошло 🥹\n\nХочу пожелать тебе, чтобы этот год принёс много классных возможностей, чтобы всё задуманное получалось, учёба давалась легко, а вне университета было ещё больше интересного и приятного. Пусть исполняются твои желания, даже самые неожиданные, и просто будет побольше поводов улыбаться!  Еще раз с праздником)🎉❤️",
+            author: "Лиза Егерева",
+            link: null
+        },
+        {
+            text: "Саша, поздравляю тебя с твоим днем рождением, желаю тебе всего самого наилучшего! \nНе болеть, жить богато, любить и быть любимой \nНадеюсь, ты не отчислишься и мы сможем закончить универ, а то скучно мне блин одной, емае.",
+            author: "Диана Иващенко",
+            link: null
+        },
+        {
+            text: "С днем рождения, Саша! \nЖелаю тебе самого крепкого здоровья, хорошего настроения и чтобы вокруг были только хорошие и поддерживающие люди. Пусть будет больше ярких впечатлений, маленьких и больших побед и пусть каждый месяц приносит что-то приятное и запоминающееся.\n\nЖелаю, чтобы всё, что ты загадаешь в этот день, обязательно сбылось! С праздником!",
+            author: "Илья Распутин",
+            link: "https://drive.google.com/file/d/1XqqH80RsNKqF6pjH6Qjxvve-9v4Fi3lU/view?usp=drivesdk"
+        },
+        {
+            text: "Саша, поздравляю тебя с днём рождения!\n\nПусть тебя всегда окружают люди, которые тебя ценят и любят. Душевной гармонии тебе, вдохновения, лёгкого достижения целей. Пусть в твоей жизни будет много ярких моментов и вообще хочу, чтобы у тебя всё было отлично несмотря ни на что 🫶🫶🫶\n\nКстати, это случаем не ты на фото? Мне показалось, что очень похоже 👀",
+            author: "Маша Ермакова",
+            link: "https://drive.google.com/file/d/1fATqVh7zE6aI7AkQkFTOINkSU2lgbSHJ/view?usp=drivesdk"
+        }
+    ];
+
+    // ============================================================
+    // Логика переключения текста
+    // ============================================================
+    let currentSlideIndex = 0;
+    const totalSlides = congratData.length;
+    
+    const textElement = document.getElementById('message-text');
+    const authorElement = document.getElementById('message-author');
+    const cardContainer = document.getElementById('card-container');
+    const attachmentLink = document.getElementById('attachment-link');
+    const scrollIndicator = document.getElementById('scroll-indicator');
+
+    const progressContainer = document.getElementById('progress-container');
+    const progressTrack = document.getElementById('progress-track');
+    const progressThumb = document.getElementById('progress-thumb');
+
+    function updateSlide(index) {
+        const data = congratData[index];
+        textElement.textContent = data.text;
+        authorElement.textContent = data.author;
+
+        if (data.link) {
+            attachmentLink.href = data.link;
+        }
+
+        // Автоматическое изменение размера шрифта в зависимости от длины текста
+        const textLength = data.text.length;
+        // Порог: если текст короче 200 символов, увеличиваем шрифт
+        if (textLength < 200) {
+            textElement.style.fontSize = '22px';
+        } else {
+            textElement.style.fontSize = '15px';
+        }
+
+        // Сбрасываем скролл текста при смене слайда
+        textElement.scrollTop = 0;
+        updateScrollIndicators();
+    }
+
+    function changeSlide(direction) {
+        currentSlideIndex += direction;
+
+        if (currentSlideIndex >= totalSlides) {
+            currentSlideIndex = 0;
+        } else if (currentSlideIndex < 0) {
+            currentSlideIndex = totalSlides - 1;
+        }
+
+        updateSlide(currentSlideIndex);
+        updateProgress(currentSlideIndex);
+    }
+
+    // ============================================================
+    // Логика скролла текста (показ "Листай ниже . . ." или ссылки)
+    // ============================================================
+    function updateScrollIndicators() {
+        const scrollTop = textElement.scrollTop;
+        const scrollHeight = textElement.scrollHeight;
+        const clientHeight = textElement.clientHeight;
+
+        const isAtBottom = (scrollTop + clientHeight >= scrollHeight - 10);
+
+        if (isAtBottom) {
+            scrollIndicator.style.display = 'none';
+            if (congratData[currentSlideIndex].link) {
+                attachmentLink.style.display = 'flex';
+            } else {
+                attachmentLink.style.display = 'none';
+            }
+        } else {
+            scrollIndicator.style.display = 'block';
+            attachmentLink.style.display = 'none';
+        }
+    }
+
+    textElement.addEventListener('scroll', updateScrollIndicators);
+
+    // ============================================================
+    // Логика полосы с кружком (перетаскивание)
+    // ============================================================
+    function updateProgress(index) {
+        const percent = (index / (totalSlides - 1)) * 100;
+        progressThumb.style.left = percent + '%';
+
+        progressContainer.classList.remove('active');
+        setTimeout(() => {
+            progressContainer.classList.add('active');
+        }, 10);
+
+        clearTimeout(window.progressTimeout);
+        window.progressTimeout = setTimeout(() => {
+            progressContainer.classList.remove('active');
+        }, 2000);
+    }
+
+    // Перетаскивание мышкой
+    let isDragging = false;
+
+    progressThumb.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        e.preventDefault();
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    });
+
+    function onMouseMove(e) {
+        if (!isDragging) return;
+        const rect = progressTrack.getBoundingClientRect();
+        let x = e.clientX - rect.left;
+        x = Math.max(0, Math.min(x, rect.width));
+        const percent = (x / rect.width) * 100;
+        progressThumb.style.left = percent + '%';
+        progressThumb.style.transition = 'none';
+    }
+
+    function onMouseUp(e) {
+        if (!isDragging) return;
+        isDragging = false;
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+
+        progressThumb.style.transition = 'left 0.4s ease';
+        const rect = progressTrack.getBoundingClientRect();
+        let x = e.clientX - rect.left;
+        x = Math.max(0, Math.min(x, rect.width));
+        const percent = (x / rect.width) * 100;
+        const newIndex = Math.round((percent / 100) * (totalSlides - 1));
+        currentSlideIndex = newIndex;
+        updateSlide(currentSlideIndex);
+        updateProgress(currentSlideIndex);
+    }
+
+    // Перетаскивание пальцем (touch)
+    let isTouchDragging = false;
+    let touchStartX = 0;
+
+    progressThumb.addEventListener('touchstart', (e) => {
+        isTouchDragging = true;
+        const touch = e.touches[0];
+        touchStartX = touch.clientX;
+        e.preventDefault();
+    });
+
+    progressThumb.addEventListener('touchmove', (e) => {
+        if (!isTouchDragging) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        const rect = progressTrack.getBoundingClientRect();
+        let x = touch.clientX - rect.left;
+        x = Math.max(0, Math.min(x, rect.width));
+        const percent = (x / rect.width) * 100;
+        progressThumb.style.left = percent + '%';
+        progressThumb.style.transition = 'none';
+    });
+
+    progressThumb.addEventListener('touchend', (e) => {
+        if (!isTouchDragging) return;
+        isTouchDragging = false;
+        progressThumb.style.transition = 'left 0.4s ease';
+        const rect = progressTrack.getBoundingClientRect();
+        const touch = e.changedTouches[0];
+        let x = touch.clientX - rect.left;
+        x = Math.max(0, Math.min(x, rect.width));
+        const percent = (x / rect.width) * 100;
+        const newIndex = Math.round((percent / 100) * (totalSlides - 1));
+        currentSlideIndex = newIndex;
+        updateSlide(currentSlideIndex);
+        updateProgress(currentSlideIndex);
+    });
+
+    // Клик на трек для переключения
+    progressTrack.addEventListener('click', (e) => {
+        if (e.target === progressThumb) return;
+        const rect = progressTrack.getBoundingClientRect();
+        let x = e.clientX - rect.left;
+        x = Math.max(0, Math.min(x, rect.width));
+        const percent = (x / rect.width) * 100;
+        const newIndex = Math.round((percent / 100) * (totalSlides - 1));
+        currentSlideIndex = newIndex;
+        updateSlide(currentSlideIndex);
+        updateProgress(currentSlideIndex);
+    });
+
+    // ============================================================
+    // Адаптивность формы блока
+    // ============================================================
+    function adjustCardShape() {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+
+        if (width > height) {
+            cardContainer.style.maxWidth = '500px';
+            cardContainer.style.aspectRatio = '16 / 9';
+        } else {
+            cardContainer.style.maxWidth = '300px';
+            cardContainer.style.aspectRatio = '1 / 1';
+        }
+    }
+
+    window.addEventListener('load', adjustCardShape);
+    window.addEventListener('resize', adjustCardShape);
+
+    // ============================================================
+    // Логика свайпа (переключение карточек)
+    // ============================================================
+    let startX = 0;
+    let isSwiping = false;
+
+    cardContainer.addEventListener('touchstart', (e) => {
+        const target = e.target;
+        if (target.closest('.card-text')) return;
+        
+        startX = e.touches[0].clientX;
+        isSwiping = true;
+    });
+
+    cardContainer.addEventListener('touchmove', (e) => {
+        if (!isSwiping) return;
+        const target = e.target;
+        if (target.closest('.card-text')) return;
+        
+        e.preventDefault();
+    });
+
+    cardContainer.addEventListener('touchend', (e) => {
+        if (!isSwiping) return;
+        isSwiping = false;
+
+        const endX = e.changedTouches[0].clientX;
+        const deltaX = endX - startX;
+
+        if (Math.abs(deltaX) > 50) {
+            if (deltaX < 0) {
+                changeSlide(1);
+            } else {
+                changeSlide(-1);
+            }
+        }
+    });
+
+    // ============================================================
+    // Слово под "ТЫ" с анимациями (8 слов, включая "красотка" с ×2)
+    // ============================================================
+    const words = ['светлая', 'загадочная', 'сногсшибательная', 'комфортик', 'прекрасная', 'нежная', 'красотка', 'добрая'];
+    const wordElement = document.getElementById('dynamic-word');
+    const x2Badge = document.getElementById('x2-badge');
+    let wordIndex = 0;
+    let x2Timer = null;
+
+    function rotateWord() {
+        clearTimeout(x2Timer);
+        x2Badge.classList.remove('show');
+
+        wordElement.style.opacity = '0';
+        wordElement.style.fontSize = '32px';
+        wordElement.style.fontWeight = '500';
+
+        setTimeout(() => {
+            wordIndex = (wordIndex + 1) % words.length;
+            const newWord = words[wordIndex];
+            wordElement.textContent = newWord;
+            wordElement.style.opacity = '1';
+
+            if (newWord === 'красотка') {
+                x2Timer = setTimeout(() => {
+                    x2Badge.classList.add('show');
+                }, 1000);
+            }
+        }, 500);
+    }
+
+    setInterval(rotateWord, 6000);
+    setTimeout(() => {
+        wordElement.style.opacity = 1;
+    }, 100);
+
+    // ============================================================
+    // Управление с клавиатуры
+    // ============================================================
+    document.addEventListener('keydown', (e) => {
+        const key = e.key;
+        // Стрелки влево/вправо для переключения слайдов
+        if (key === 'ArrowLeft') {
+            e.preventDefault();
+            changeSlide(-1);
+        } else if (key === 'ArrowRight') {
+            e.preventDefault();
+            changeSlide(1);
+        }
+        // Стрелки вверх/вниз для скролла текста
+        else if (key === 'ArrowDown') {
+            e.preventDefault();
+            textElement.scrollTop += 30;
+            updateScrollIndicators();
+        } else if (key === 'ArrowUp') {
+            e.preventDefault();
+            textElement.scrollTop -= 30;
+            updateScrollIndicators();
+        }
+    });
+
+    // ============================================================
+    // Падающие котики при клике на свободную область
+    // ============================================================
+    const catEmojis = ['🐱', '😸', '😹', '😻', '😺'];
+
+    document.addEventListener('click', function(e) {
+        if (!splashScreen.classList.contains('hidden')) return;
+        if (e.target.closest('a') || e.target.closest('button') || e.target.closest('.card-text')) {
+            return;
+        }
+
+        const emoji = catEmojis[Math.floor(Math.random() * catEmojis.length)];
+        const cat = document.createElement('div');
+        cat.className = 'falling-cat';
+        cat.textContent = emoji;
+        
+        cat.style.left = (e.clientX - 30) + 'px';
+        cat.style.top = (e.clientY - 30) + 'px';
+
+        document.body.appendChild(cat);
+
+        setTimeout(() => {
+            cat.remove();
+        }, 2800);
+    });
+
+    // Инициализация
+    updateSlide(currentSlideIndex);
+    updateProgress(currentSlideIndex);
+</script>
+</body>
+</html>
